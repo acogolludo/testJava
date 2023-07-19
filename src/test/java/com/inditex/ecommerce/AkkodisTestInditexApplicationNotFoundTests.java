@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {AkkodisTestInditexApplication.class})
-class AkkodisTestInditexApplicationTests {
+class AkkodisTestInditexApplicationNotFoundTests {
 
     @Autowired
     private PriceController controller;
@@ -38,10 +38,10 @@ class AkkodisTestInditexApplicationTests {
 
 
     @Test
-    public void test1() throws Exception {
+    public void testBrandNotExist() throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_B);
         PriceFilter filter = new PriceFilter();
-        filter.setBrandId(Constants.BrandEnum.ZARA.getCode());
+        filter.setBrandId(BigInteger.ZERO);
         filter.setProductId(BigInteger.valueOf(35455));
         filter.setDateApp(sdf.parse("2020-06-14 10:00:00"));
         mvc.perform(post("/gettest")
@@ -49,67 +49,52 @@ class AkkodisTestInditexApplicationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void test2() throws Exception {
+    public void testProductNotExists() throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_B);
         PriceFilter filter = new PriceFilter();
         filter.setBrandId(Constants.BrandEnum.ZARA.getCode());
-        filter.setProductId(BigInteger.valueOf(35455));
+        filter.setProductId(BigInteger.valueOf(35460));
         filter.setDateApp(sdf.parse("2020-06-14 16:00:00"));
         mvc.perform(post("/gettest")
                         .content(stringToJson(filter))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    public void test3() throws Exception {
+    public void testMinorDate() throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_B);
         PriceFilter filter = new PriceFilter();
         filter.setBrandId(Constants.BrandEnum.ZARA.getCode());
         filter.setProductId(BigInteger.valueOf(35455));
-        filter.setDateApp(sdf.parse("2020-06-14 21:00:00"));
+        filter.setDateApp(sdf.parse("2019-06-14 21:00:00"));
         mvc.perform(post("/gettest")
                         .content(stringToJson(filter))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void test4() throws Exception {
+    public void testMajorDate() throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_B);
         PriceFilter filter = new PriceFilter();
         filter.setBrandId(Constants.BrandEnum.ZARA.getCode());
         filter.setProductId(BigInteger.valueOf(35455));
-        filter.setDateApp(sdf.parse("2020-06-15 10:00:00"));
+        filter.setDateApp(sdf.parse("2022-06-15 10:00:00"));
         mvc.perform(post("/gettest")
                         .content(stringToJson(filter))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void test5() throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_B);
-        PriceFilter filter = new PriceFilter();
-        filter.setBrandId(Constants.BrandEnum.ZARA.getCode());
-        filter.setProductId(BigInteger.valueOf(35455));
-        filter.setDateApp(sdf.parse("2020-06-16 21:00:00"));
-        mvc.perform(post("/gettest")
-                        .content(stringToJson(filter))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest());
     }
 
     private static String stringToJson(Object obj) {
